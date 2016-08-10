@@ -1,0 +1,4 @@
+[Project]
+Name=cpp_framework
+Manager=KDevCMakeManager
+VersionControl=kdevgit
