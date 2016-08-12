@@ -13,7 +13,7 @@ namespace CppFW
 	class CVMatTree
 	{
 	public:
-		enum class Type { Undef, Dir, List, Mat };
+		enum class Type { Undef, Dir, List, Mat, String };
 
 		typedef std::pair<const std::string, CVMatTree*> NodePair;
 		typedef std::map<std::string, CVMatTree*>        NodeDir ;
@@ -37,6 +37,9 @@ namespace CppFW
 
 		cv::Mat& getMat();
 		const cv::Mat& getMat() const;
+
+		std::string& getString();
+		const std::string& getString() const;
 		
 		bool operator==(const CVMatTree& other) const;
 		bool operator!=(const CVMatTree& other) const            { return !operator==(other); }
@@ -50,6 +53,7 @@ namespace CppFW
 		cv::Mat*                             mat          = nullptr;
 		NodeDir                              nodeDir;
 		NodeList                             nodeList;
+		std::string                          str;
 		
 		void print(std::ostream& stream, int deept) const;
 	};

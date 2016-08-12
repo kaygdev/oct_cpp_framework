@@ -83,10 +83,12 @@ BOOST_AUTO_TEST_SUITE(CVMatTreeBin)
 		createMat<double>(tree1bla1.getMat(), 5 ,10);
 		CppFW::CVMatTree& tree1bla2 = tree1bla.newListNode();
 		createMat<int>(tree1bla2.getMat(), 5 ,5);
-		CppFW::CVMatTree& tree1bla3hm = tree1bla.newListNode().getDirNode("hm");
-		createMat<float>(tree1bla3hm.getMat(), 5 ,3);
+		CppFW::CVMatTree& tree1bla3hm = tree1bla.newListNode();
+		tree1bla3hm.getDirNode("name").getString() = "Matrix-Name";
+		createMat<float>(tree1bla3hm.getDirNode("mat").getMat(), 5 ,3);
 
 		tree1blub.newListNode().getMat();
+		tree1blub.newListNode().getString() = "Test String";
 
 
 		std::stringstream sstream;
@@ -99,7 +101,7 @@ BOOST_AUTO_TEST_SUITE(CVMatTreeBin)
 		BOOST_CHECK( tree1 == tree2 );
 	}
 
-/*
+
 	BOOST_AUTO_TEST_CASE( CVMatTreeBin_save_more_complex_trees )
 	{
 
@@ -112,10 +114,12 @@ BOOST_AUTO_TEST_SUITE(CVMatTreeBin)
 		createMat<double>(tree1bla1.getMat(), 5 ,10);
 		CppFW::CVMatTree& tree1bla2 = tree1bla.newListNode();
 		createMat<int>(tree1bla2.getMat(), 5 ,5);
-		CppFW::CVMatTree& tree1bla3hm = tree1bla.newListNode().getDirNode("hm");
-		createMat<float>(tree1bla3hm.getMat(), 5 ,3);
+		CppFW::CVMatTree& tree1bla3hm = tree1bla.newListNode();
+		tree1bla3hm.getDirNode("name").getString() = "Matrix-Name";
+		createMat<float>(tree1bla3hm.getDirNode("mat").getMat(), 5 ,3);
 
 		tree1blub.newListNode().getMat();
+		tree1blub.newListNode().getString() = "Test String";
 
 
 		std::stringstream sstream;
@@ -125,7 +129,7 @@ BOOST_AUTO_TEST_SUITE(CVMatTreeBin)
 		CppFW::CVMatTreeStructBin::writeMatlabReadCode("readbin.m");
 		std::cout << tree1 << std::endl;
 	}
-	*/
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -116,6 +116,8 @@ namespace CppFW
 			delete pair.second;
 		nodeDir.clear();
 
+		str.clear();
+
 		internalType = Type::Undef;
 	}
 
@@ -182,6 +184,8 @@ namespace CppFW
 				return nodeList.size();
 			case Type::Mat:
 				return 1;
+			case Type::String:
+				return 1;
 			case Type::Undef:
 				return 0;
 		}
@@ -208,6 +212,23 @@ namespace CppFW
 		return *mat;
 	}
 
+	const std::string& CVMatTree::getString() const
+	{
+		if(internalType != Type::String)
+			throw "wrong type";
+		return str;
+	}
+
+	std::string& CVMatTree::getString()
+	{
+		if(internalType == Type::Undef)
+			internalType = Type::String;
+		if(internalType != Type::String)
+			throw "wrong type";
+		return str;
+	}
+
+
 
 	bool CVMatTree::operator==(const CppFW::CVMatTree& other) const
 	{
@@ -218,6 +239,8 @@ namespace CppFW
 		{
 			case Type::Undef:
 				return true;
+			case Type::String:
+				return str == other.str;
 			case Type::Mat:
 				return matIsEqual(*mat, *(other.mat));
 			case Type::List:
@@ -250,6 +273,9 @@ namespace CppFW
 		{
 			case Type::Undef:
 				stream << "<>";
+				break;
+			case Type::String:
+				stream << "Str: " << str;
 				break;
 			case Type::Mat:
 				stream << "Mat " << mat->rows << " x " << mat->cols << " | type: " << mat->type() << " | depth: " << mat->depth() << " | channels: " << mat->channels() << '\n';

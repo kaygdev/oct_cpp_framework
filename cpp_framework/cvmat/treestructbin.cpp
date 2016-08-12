@@ -135,7 +135,7 @@ namespace CppFW
 		return std::move(tree);
 	}
 
-	CVMatTree CVMatTreeStructBin::readBin(const std::__cxx11::string& filename)
+	CVMatTree CVMatTreeStructBin::readBin(const std::string& filename)
 	{
 		std::ifstream stream(filename, std::ios::binary | std::ios::in);
 		if(!stream.good())
@@ -197,7 +197,6 @@ namespace CppFW
 			ret &= handleNodeRead(node.newListNode());
 		}
 		return ret;
-
 	}
 
 
@@ -218,6 +217,9 @@ namespace CppFW
 			case CVMatTree::Type::Mat:
 				writeMatP(node.getMat());
 				break;
+			case CVMatTree::Type::String:
+				writeString(node.getString());
+				break;
 		}
 	}
 	
@@ -237,10 +239,23 @@ namespace CppFW
 				return readList(node);
 			case CVMatTree::Type::Mat:
 				return readMatP(node.getMat());
+			case CVMatTree::Type::String:
+				return readString(node.getString());
 		}
 		return false;
 	}
 
+	bool CVMatTreeStructBin::readString(std::string& str)
+	{
+		str = readBinSting(istream);
+		return true;
+	}
+
+
+	void CVMatTreeStructBin::writeString(const std::string& string)
+	{
+		writeBin2Stream(ostream, string);
+	}
 
 
 	void CVMatTreeStructBin::writeHeader()
@@ -374,12 +389,14 @@ namespace CppFW
 		stream << "function [node] = readNode(fileID)\n";
 		stream << "\ttype  = fread(fileID, 1, 'uint32');\n";
 		stream << "\tswitch(type)\n";
-		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Dir ) << '\n';
+		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Dir   ) << '\n';
 		stream << "\t\t\tnode = readDir(fileID);\n";
-		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Mat ) << '\n';
+		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Mat   ) << '\n';
 		stream << "\t\t\tnode = readMat(fileID);\n";
-		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::List) << '\n';
+		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::List  ) << '\n';
 		stream << "\t\t\tnode = readList(fileID);\n";
+		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::String) << '\n';
+		stream << "\t\t\tnode = readString(fileID);\n";
 		stream << "\tend\n";
 		stream << "end\n\n";
 

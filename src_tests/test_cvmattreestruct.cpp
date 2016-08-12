@@ -117,6 +117,13 @@ BOOST_AUTO_TEST_CASE( CVMatTree_clear_becoms_undef )
 	tree.clear();
 	BOOST_REQUIRE( tree.type() == CppFW::CVMatTree::Type::Undef );
 	BOOST_CHECK( tree.getNumElements() == 0 );
+
+	BOOST_CHECK_NO_THROW(tree.getString());
+	BOOST_CHECK( tree.type() == CppFW::CVMatTree::Type::String );
+	BOOST_CHECK( tree.getNumElements() == 1 );
+	tree.clear();
+	BOOST_REQUIRE( tree.type() == CppFW::CVMatTree::Type::Undef );
+	BOOST_CHECK( tree.getNumElements() == 0 );
 }
 
 	BOOST_AUTO_TEST_SUITE(Compare)

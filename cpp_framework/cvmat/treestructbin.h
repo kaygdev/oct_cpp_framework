@@ -18,17 +18,19 @@ namespace CppFW
 
 		// writer functions
 		void writeHeader();
-		void writeMatP(const cv::Mat& mat);
-		void writeDir (const CVMatTree& node);
-		void writeList(const CVMatTree& node);
+		void writeMatP  (const cv::Mat& mat);
+		void writeDir   (const CVMatTree& node);
+		void writeList  (const CVMatTree& node);
+		void writeString(const std::string& str);
 
 		void handleNodeWrite(const CVMatTree& node);
 		
 		// reader functions
 		bool readHeader();
-		bool readMatP(cv::Mat& mat);
-		bool readDir (CVMatTree& node);
-		bool readList(CVMatTree& node);
+		bool readMatP  (cv::Mat& mat);
+		bool readDir   (CVMatTree& node);
+		bool readList  (CVMatTree& node);
+		bool readString(std::string& str);
 
 		bool handleNodeRead(CVMatTree& node);
 
