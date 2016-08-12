@@ -20,7 +20,7 @@ namespace CppFW
 		typedef std::vector<CVMatTree*>                  NodeList;
 
 		CVMatTree()            = default;
-		CVMatTree(CVMatTree&&) = default;
+		CVMatTree(CVMatTree&&);
 		~CVMatTree();
 
 		Type type() const                                        { return internalType; }

@@ -46,7 +46,7 @@ namespace
 			return true;
 		
 		// if dimensionality of two mat is not identical, these two mat is not identical
-		if(mat1.cols != mat2.cols || mat1.rows != mat2.rows || mat1.dims != mat2.dims)
+		if(mat1.cols != mat2.cols || mat1.rows != mat2.rows || mat1.dims != mat2.dims || mat1.type() != mat2.type())
 			return false;
 			
 		cv::Mat diff;
@@ -98,12 +98,22 @@ namespace CppFW
 	CVMatTree::~CVMatTree()
 	{
 		delete mat;
+		for(CVMatTree* obj : nodeList)
+			delete obj;
+		for(NodePair& pair : nodeDir)
+			delete pair.second;
 	}
 
 	void CVMatTree::clear()
 	{
 		delete mat;
 		mat = nullptr;
+
+		for(CVMatTree* obj : nodeList)
+			delete obj;
+		nodeList.clear();
+		for(NodePair& pair : nodeDir)
+			delete pair.second;
 		nodeDir.clear();
 
 		internalType = Type::Undef;
@@ -137,7 +147,7 @@ namespace CppFW
 
 	const CVMatTree::NodeList& CVMatTree::getNodeList() const
 	{
-		if(internalType != Type::Dir)
+		if(internalType != Type::List)
 			throw std::domain_error("wrong type");
 		return nodeList;
 
@@ -162,7 +172,6 @@ namespace CppFW
 		return *newNode;
 	}
 
-
 	std::size_t CVMatTree::getNumElements() const
 	{
 		switch(internalType)
@@ -180,6 +189,12 @@ namespace CppFW
 		return 0;
 	}
 
+	const cv::Mat& CVMatTree::getMat() const
+	{
+		if(internalType != Type::Mat)
+			throw "wrong type";
+		return *mat;
+	}
 
 	cv::Mat& CVMatTree::getMat()
 	{
@@ -192,66 +207,77 @@ namespace CppFW
 			throw "wrong type";
 		return *mat;
 	}
-}
 
 
-bool CppFW::CVMatTree::operator==(const CppFW::CVMatTree& other) const
-{
-	if(internalType != other.internalType)
+	bool CVMatTree::operator==(const CppFW::CVMatTree& other) const
+	{
+		if(internalType != other.internalType)
+			return false;
+
+		switch(internalType)
+		{
+			case Type::Undef:
+				return true;
+			case Type::Mat:
+				return matIsEqual(*mat, *(other.mat));
+			case Type::List:
+				return vector_compare_ptr(nodeList, other.nodeList);
+			case Type::Dir:
+				return map_compare_ptr(nodeDir, other.nodeDir);
+		}
+
 		return false;
-	
-	switch(internalType)
-	{
-		case Type::Undef:
-			return true;
-		case Type::Mat:
-			return matIsEqual(*mat, *(other.mat));
-		case Type::List:
-			return vector_compare_ptr(nodeList, other.nodeList);
-		case Type::Dir:
-			return map_compare_ptr(nodeDir, other.nodeDir);
 	}
-	
-	return false;
-}
 
-void CppFW::CVMatTree::print(std::ostream& stream) const
-{
-	print(stream, 0);
-}
-
-void CppFW::CVMatTree::print(std::ostream& stream, int deept) const
-{
-	switch(internalType)
+	CVMatTree::CVMatTree(CVMatTree&& other)
 	{
-		case Type::Undef:
-			stream << "<>";
-			break;
-		case Type::Mat:
-			stream << "Mat " << mat->rows << " x " << mat->cols;
-			break;
-		case Type::List:
-			stream << "{\n";
-			for(const CVMatTree* node : nodeList)
-			{
-				for(int i=-1; i<deept; ++i) stream << "  ";
-				node->print(stream, deept+1);
-			}
-			for(int i=0; i<deept; ++i) stream << "  ";
-			stream << '}';
-			break;
-		case Type::Dir:
-			stream << "[\n";
-			for(const NodePair& pair : nodeDir)
-			{
-				for(int i=-1; i<deept; ++i) stream << "  ";
-				stream << pair.first << " : ";
-				pair.second->print(stream, deept+1);
-			}
-			for(int i=0; i<deept; ++i) stream << "  ";
-			stream << ']';
-			break;
-	}
-	stream << '\n';
-}
+		std::swap(mat         , other.mat         );
+		std::swap(internalType, other.internalType);
 
+		nodeDir .swap(other.nodeDir );
+		nodeList.swap(other.nodeList);
+	}
+
+
+	void CVMatTree::print(std::ostream& stream) const
+	{
+		print(stream, 0);
+	}
+
+	void CVMatTree::print(std::ostream& stream, int deept) const
+	{
+		switch(internalType)
+		{
+			case Type::Undef:
+				stream << "<>";
+				break;
+			case Type::Mat:
+				stream << "Mat " << mat->rows << " x " << mat->cols << " | type: " << mat->type() << " | depth: " << mat->depth() << " | channels: " << mat->channels() << '\n';
+				stream << *mat;
+				break;
+			case Type::List:
+				stream << "{\n";
+				for(const CVMatTree* node : nodeList)
+				{
+					for(int i=-1; i<deept; ++i) stream << "  ";
+					node->print(stream, deept+1);
+				}
+				for(int i=0; i<deept; ++i) stream << "  ";
+				stream << '}';
+				break;
+			case Type::Dir:
+				stream << "[\n";
+				for(const NodePair& pair : nodeDir)
+				{
+					for(int i=-1; i<deept; ++i) stream << "  ";
+					stream << pair.first << " : ";
+					pair.second->print(stream, deept+1);
+				}
+				for(int i=0; i<deept; ++i) stream << "  ";
+				stream << ']';
+				break;
+		}
+		stream << '\n';
+	}
+
+}
