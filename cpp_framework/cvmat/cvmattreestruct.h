@@ -37,8 +37,11 @@ namespace CppFW
 
 		cv::Mat& getMat();
 		const cv::Mat& getMat() const;
+		
+		bool operator==(const CVMatTree& other) const;
+		bool operator!=(const CVMatTree& other) const            { return !operator==(other); }
 
-
+		void print(std::ostream& stream) const;
 	private:
 		CVMatTree(const CVMatTree&)            = delete;
 		CVMatTree& operator=(const CVMatTree&) = delete;
@@ -47,7 +50,11 @@ namespace CppFW
 		cv::Mat*                             mat          = nullptr;
 		NodeDir                              nodeDir;
 		NodeList                             nodeList;
+		
+		void print(std::ostream& stream, int deept) const;
 	};
 
 
 }
+
+inline std::ostream& operator<<(std::ostream& stream, const CppFW::CVMatTree& obj) { obj.print(stream); return stream; }
