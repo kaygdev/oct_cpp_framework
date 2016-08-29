@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(cpp_framework)
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost COMPONENTS unit_test_framework filesystem system REQUIRED)
 find_package(OpenCV REQUIRED)
 
 
@@ -44,7 +44,7 @@ ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 file(GLOB sources_test "${CMAKE_CURRENT_SOURCE_DIR}/src_tests/*.cpp")
 add_executable(cpp_framework_test ${sources_test})
 
-target_link_libraries(cpp_framework_test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+target_link_libraries(cpp_framework_test ${Boost_LIBRARIES} )
 target_link_libraries(cpp_framework_test cpp_framework)
 target_link_libraries(cpp_framework_test ${OpenCV_LIBRARIES})
 

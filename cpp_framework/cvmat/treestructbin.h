@@ -41,6 +41,7 @@ namespace CppFW
 	public:
 		static bool writeBin(      std::ostream& stream , const CVMatTree& tree);
 		static bool writeBin(const std::string& filename, const CVMatTree& tree);
+		static bool writeBin(const std::string& filename, const cv::Mat& mat);
 		
 		static CVMatTree readBin(const std::string& filename);
 		static CVMatTree readBin(std::istream& stream);
