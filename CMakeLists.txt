@@ -10,7 +10,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 	set(compiler_flags_debug "-Wall -Wextra -Wunreachable-code -Werror")        ## -Weverything
-	set(CMAKE_CXX_FLAGS "-std=c++11")
+	set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC")
 
 	if(${WIN32})
 		set(CMAKE_CXX_FLAGS "-mno-ms-bitfields -static -static-libstdc++ ${CMAKE_CXX_FLAGS}")

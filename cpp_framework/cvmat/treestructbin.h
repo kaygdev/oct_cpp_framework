@@ -46,7 +46,8 @@ namespace CppFW
 		static CVMatTree readBin(const std::string& filename);
 		static CVMatTree readBin(std::istream& stream);
 
-		static void writeMatlabReadCode(const char* filename);
+		static void writeMatlabReadCode (const char* filename);
+		static void writeMatlabWriteCode(const char* filename);
 	};
 
 }
