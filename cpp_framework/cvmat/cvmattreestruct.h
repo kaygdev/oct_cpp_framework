@@ -26,7 +26,8 @@ namespace CppFW
 		Type type() const                                        { return internalType; }
 		void clear();
 
-		CVMatTree& getDirNode(const std::string& name);
+		      CVMatTree& getDirNode(const std::string& name);
+		const CVMatTree* getDirNodeOpt(const char* name) const;
 		const NodeDir& getNodeDir() const;
 
 		CVMatTree& getListNode(std::size_t index);

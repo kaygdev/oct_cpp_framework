@@ -132,6 +132,19 @@ namespace CppFW
 		return getAndInsert<CVMatTree, std::string, NodeDir>(name, nodeDir);
 	}
 
+	const CppFW::CVMatTree* CVMatTree::getDirNodeOpt(const char* name) const
+	{
+		if(internalType != Type::Dir)
+			return nullptr;
+
+		NodeDir::const_iterator it = nodeDir.find(name);
+		if(it == nodeDir.end())
+			return nullptr;
+
+		return it->second;
+	}
+
+
 	const CVMatTree::NodeDir& CVMatTree::getNodeDir() const
 	{
 		if(internalType != Type::Dir)
