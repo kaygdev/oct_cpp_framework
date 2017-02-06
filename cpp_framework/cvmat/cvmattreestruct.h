@@ -38,6 +38,7 @@ namespace CppFW
 
 		cv::Mat& getMat();
 		const cv::Mat& getMat() const;
+		const cv::Mat* getMatOpt() const;
 
 		std::string& getString();
 		const std::string& getString() const;

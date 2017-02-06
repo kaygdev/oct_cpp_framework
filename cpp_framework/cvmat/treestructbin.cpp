@@ -559,7 +559,7 @@ namespace CppFW
 		stream << "function [] = writeMat(fileID, mat)\n";
 
 
-#define MatlabSwtichType(X, Y) 	stream << "	if isa(mat, '"#Y"') \n\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << "';\n\tend\n";
+#define MatlabSwtichType(X, Y) 	stream << "	if isa(mat, '"#Y"')\n\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << "';\n\tend\n";
 		MatlabSwtichType(uint8_t , uint8 )
 		MatlabSwtichType(uint16_t, uint16)
 		MatlabSwtichType(uint32_t, uint32)

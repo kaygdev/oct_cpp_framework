@@ -213,6 +213,13 @@ namespace CppFW
 		return *mat;
 	}
 
+	const cv::Mat* CVMatTree::getMatOpt() const
+	{
+		if(internalType != Type::Mat)
+			return nullptr;
+		return mat;
+	}
+
 	cv::Mat& CVMatTree::getMat()
 	{
 		if(internalType == Type::Undef)
