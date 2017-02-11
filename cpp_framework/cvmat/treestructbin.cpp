@@ -408,6 +408,9 @@ namespace CppFW
 		stream << "function [node] = readNode(fileID)\n";
 		stream << "\ttype  = fread(fileID, 1, 'uint32');\n";
 		stream << "\tswitch(type)\n";
+		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Undef ) << '\n';
+		stream << "\t\t\t% node not written because unhandled type\n";
+		stream << "\t\t\tnode = [];\n";
 		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Dir   ) << '\n';
 		stream << "\t\t\tnode = readDir(fileID);\n";
 		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::Mat   ) << '\n';
@@ -416,6 +419,9 @@ namespace CppFW
 		stream << "\t\t\tnode = readList(fileID);\n";
 		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::String) << '\n';
 		stream << "\t\t\tnode = readString(fileID);\n";
+		stream << "\t\totherwise\n";
+		stream << "\t\t\tfprintf('unknown node type %d', type);\n";
+		stream << "\t\t\tnode = [];\n";
 		stream << "\tend\n";
 		stream << "end\n\n";
 
@@ -509,21 +515,26 @@ namespace CppFW
 		stream << "\tif isstruct(node)\n";
 		stream << "\t\tfwrite(fileID, " << static_cast<uint32_t>(CVMatTree::Type::Dir  ) << ", 'uint32');\n";
 		stream << "\t\twriteDir(fileID, node);\n";
-		stream << "\tend\n";
 
-		stream << "\tif isnumeric(node)\n";
+		stream << "\telseif isnumeric(node)\n";
 		stream << "\t\tfwrite(fileID, " << static_cast<uint32_t>(CVMatTree::Type::Mat  ) << ", 'uint32');\n";
 		stream << "\t\twriteMat(fileID, node);\n";
-		stream << "\tend\n";
 
-		stream << "\tif iscell(node)\n";
+		stream << "\telseif islogical(node)\n";
+		stream << "\t\tfwrite(fileID, " << static_cast<uint32_t>(CVMatTree::Type::Mat  ) << ", 'uint32');\n";
+		stream << "\t\twriteMat(fileID, uint8(node));\n";
+
+		stream << "\telseif iscell(node)\n";
 		stream << "\t\tfwrite(fileID, " << static_cast<uint32_t>(CVMatTree::Type::List  ) << ", 'uint32');\n";
 		stream << "\t\twriteList(fileID, node);\n";
-		stream << "\tend\n";
 
-		stream << "\tif ischar(node)\n";
+		stream << "\telseif ischar(node)\n";
 		stream << "\t\tfwrite(fileID, " << static_cast<uint32_t>(CVMatTree::Type::String  ) << ", 'uint32');\n";
 		stream << "\t\twriteString(fileID, node);\n";
+
+		stream << "\telse\n";
+		stream << "\t\tfprintf('unhandled node type, ignored\\n');\n";
+		stream << "\t\tfwrite(fileID, " << static_cast<uint32_t>(CVMatTree::Type::Undef  ) << ", 'uint32');\n";
 		stream << "\tend\n";
 
 		stream << "end\n\n";
@@ -559,16 +570,19 @@ namespace CppFW
 		stream << "function [] = writeMat(fileID, mat)\n";
 
 
-#define MatlabSwtichType(X, Y) 	stream << "	if isa(mat, '"#Y"')\n\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << "';\n\tend\n";
-		MatlabSwtichType(uint8_t , uint8 )
-		MatlabSwtichType(uint16_t, uint16)
-		MatlabSwtichType(uint32_t, uint32)
-		MatlabSwtichType( int8_t , int8  )
-		MatlabSwtichType( int16_t, int16 )
-		MatlabSwtichType( int32_t, int32 )
-		MatlabSwtichType(float   , single)
-		MatlabSwtichType(double  , double)
+#define MatlabSwtichType(STR, X, Y) 	stream << "	" STR"if isa(mat, '"#Y"')\n\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << "';\n";
+		MatlabSwtichType(""    , uint8_t , uint8 )
+		MatlabSwtichType("else", uint16_t, uint16)
+		MatlabSwtichType("else", uint32_t, uint32)
+		MatlabSwtichType("else",  int8_t , int8  )
+		MatlabSwtichType("else",  int16_t, int16 )
+		MatlabSwtichType("else",  int32_t, int32 )
+		MatlabSwtichType("else", float   , single)
+		MatlabSwtichType("else", double  , double)
 #undef MatlabSwtichType
+		stream << "\telse\n\t\tfprintf('unhandled matrics format, convert to double\\n');\n\t\tmat = double(mat);\n";
+		stream << "\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<double>::type) << "';\n";
+		stream << "\tend\n\n";
 
 		stream << "\t[rows, cols] = size(mat);\n";
 
@@ -576,18 +590,19 @@ namespace CppFW
 		stream << "\tfwrite(fileID, 1   , 'uint32');\n";
 		stream << "\tfwrite(fileID, rows, 'uint32');\n"; // transpose!
 		stream << "\tfwrite(fileID, cols, 'uint32');\n";
-		stream << "\tfwrite(fileID, [0,0,0,0], 'uint32');\n";
+		stream << "\tfwrite(fileID, [0,0,0,0], 'uint32');\n\n";
 
-#define MatlabSwtichType(X) stream << "	if isa(mat, '"#X"')\n\t\tfwrite(fileID, mat', '"#X"')';\n\tend\n";
-		MatlabSwtichType(uint8 )
-		MatlabSwtichType(uint16)
-		MatlabSwtichType(uint32)
-		MatlabSwtichType(int8  )
-		MatlabSwtichType(int16 )
-		MatlabSwtichType(int32 )
-		MatlabSwtichType(single)
-		MatlabSwtichType(double)
+#define MatlabSwtichType(STR, X) stream << "	" STR"if isa(mat, '"#X"')\n\t\tfwrite(fileID, mat', '"#X"')';\n";
+		MatlabSwtichType(""    , uint8 )
+		MatlabSwtichType("else", uint16)
+		MatlabSwtichType("else", uint32)
+		MatlabSwtichType("else", int8  )
+		MatlabSwtichType("else", int16 )
+		MatlabSwtichType("else", int32 )
+		MatlabSwtichType("else", single)
+		MatlabSwtichType("else", double)
 #undef MatlabSwtichType
+		stream << "\tend\n\n";
 
 		stream << "end\n";
 	}
