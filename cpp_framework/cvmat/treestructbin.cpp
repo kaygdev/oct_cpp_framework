@@ -420,7 +420,7 @@ namespace CppFW
 		stream << "\t\tcase " << static_cast<uint32_t>(CVMatTree::Type::String) << '\n';
 		stream << "\t\t\tnode = readString(fileID);\n";
 		stream << "\t\totherwise\n";
-		stream << "\t\t\tfprintf('unknown node type %d', type);\n";
+		stream << "\t\t\tfprintf('unknown node type %d\\n', type);\n";
 		stream << "\t\t\tnode = [];\n";
 		stream << "\tend\n";
 		stream << "end\n\n";
