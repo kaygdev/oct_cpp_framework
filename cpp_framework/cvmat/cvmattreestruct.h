@@ -28,7 +28,7 @@ namespace CppFW
 
 		      CVMatTree& getDirNode(const std::string& name);
 		const CVMatTree* getDirNodeOpt(const char* name) const;
-		const NodeDir& getNodeDir() const;
+		const NodeDir  & getNodeDir() const;
 
 		CVMatTree& getListNode(std::size_t index);
 		const NodeList& getNodeList() const;
