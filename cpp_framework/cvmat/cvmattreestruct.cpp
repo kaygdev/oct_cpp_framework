@@ -128,9 +128,22 @@ namespace CppFW
 		if(internalType == Type::Undef)
 			internalType = Type::Dir;
 		if(internalType != Type::Dir)
-			throw std::domain_error("wrong type");
+			throw WrongType("CVMatTree::getDirNode()");
 		return getAndInsert<CVMatTree, std::string, NodeDir>(name, nodeDir);
 	}
+
+	const CppFW::CVMatTree& CVMatTree::getDirNode(const std::string& name) const
+	{
+		if(internalType != Type::Dir)
+			throw WrongType("CVMatTree::getDirNode() const");
+
+		const NodeDir::const_iterator it = nodeDir.find(name);
+		if(it == nodeDir.end())
+			throw std::out_of_range("CVMatTree::getDirNode() const: node not found");
+
+		return *(it->second);
+	}
+
 
 	const CppFW::CVMatTree* CVMatTree::getDirNodeOpt(const char* name) const
 	{
@@ -148,7 +161,7 @@ namespace CppFW
 	const CVMatTree::NodeDir& CVMatTree::getNodeDir() const
 	{
 		if(internalType != Type::Dir)
-			throw std::domain_error("wrong type");
+			throw WrongType("CVMatTree::getNodeDir() const");
 		return nodeDir;
 	}
 
@@ -156,14 +169,14 @@ namespace CppFW
 	CVMatTree& CVMatTree::getListNode(std::size_t index)
 	{
 		if(internalType != Type::List)
-			throw std::domain_error("wrong type");
+			throw WrongType("VMatTree::getListNode()");
 		return *(nodeList.at(index));
 	}
 
 	const CVMatTree::NodeList& CVMatTree::getNodeList() const
 	{
 		if(internalType != Type::List)
-			throw std::domain_error("wrong type");
+			throw WrongType("CVMatTree::getNodeList() const");
 		return nodeList;
 
 	}
@@ -173,7 +186,7 @@ namespace CppFW
 		if(internalType == Type::Undef)
 			internalType = Type::List;
 		if(internalType != Type::List)
-			throw std::domain_error("wrong type");
+			throw WrongType("CVMatTree::newListNode()");
 		CVMatTree* newNode = new CVMatTree;
 		try
 		{
@@ -209,7 +222,7 @@ namespace CppFW
 	const cv::Mat& CVMatTree::getMat() const
 	{
 		if(internalType != Type::Mat)
-			throw "wrong type";
+			throw WrongType("CVMatTree::getMat() const");
 		return *mat;
 	}
 
@@ -228,14 +241,14 @@ namespace CppFW
 			mat = new cv::Mat;
 		}
 		if(internalType != Type::Mat)
-			throw "wrong type";
+			throw WrongType("CVMatTree::getMat()");
 		return *mat;
 	}
 
 	const std::string& CVMatTree::getString() const
 	{
 		if(internalType != Type::String)
-			throw "wrong type";
+			throw WrongType("CVMatTree::getString() const");
 		return str;
 	}
 
@@ -244,7 +257,7 @@ namespace CppFW
 		if(internalType == Type::Undef)
 			internalType = Type::String;
 		if(internalType != Type::String)
-			throw "wrong type";
+			throw WrongType("CVMatTree::getString()");
 		return str;
 	}
 

@@ -3,6 +3,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <stdexcept>
 
 namespace cv { class Mat; }
 
@@ -13,6 +14,12 @@ namespace CppFW
 	class CVMatTree
 	{
 	public:
+		class WrongType : public std::domain_error
+		{
+		public:
+			WrongType(const char* what_arg) : domain_error(what_arg) {}
+		};
+
 		enum class Type { Undef, Dir, List, Mat, String };
 
 		typedef std::pair<const std::string, CVMatTree*> NodePair;
@@ -27,6 +34,7 @@ namespace CppFW
 		void clear();
 
 		      CVMatTree& getDirNode(const std::string& name);
+		const CVMatTree& getDirNode(const std::string& name) const;
 		const CVMatTree* getDirNodeOpt(const char* name) const;
 		const NodeDir  & getNodeDir() const;
 
