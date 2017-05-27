@@ -22,7 +22,7 @@ namespace CppFW
 
 
 		template<typename T>
-		static T getCvScalar(const CVMatTree* tree, T defaultValue)
+		static T getCvScalar(const CVMatTree* tree, T defaultValue, std::size_t index = 0)
 		{
 			if(!tree)
 				return defaultValue;
@@ -32,12 +32,12 @@ namespace CppFW
 				return defaultValue;
 
 			if(mat->type() == cv::DataType<T>::type)
-				return mat->at<T>(0,0);
+				return *(mat->ptr<T>(0) + index);
 
-			cv::Mat t = (*mat)(cv::Range(0, 1), cv::Range(0, 1));
+// 			cv::Mat t = (*mat)(cv::Range(0, 1), cv::Range(0, 1));
 			cv::Mat conv;
-			t.convertTo(conv, cv::DataType<T>::type);
-			return conv.at<T>(0,0);
+			mat->convertTo(conv, cv::DataType<T>::type); // TODO: convert-funktion ersetzen
+			return *(conv.ptr<T>(0) + index);
 		}
 
 	};
