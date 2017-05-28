@@ -40,6 +40,14 @@ namespace CppFW
 			return *(conv.ptr<T>(0) + index);
 		}
 
+		template<typename T>
+		static cv::Mat convertVector2Mat(const std::vector<T>& vector)
+		{
+			cv::Mat out(static_cast<int>(vector.size()), 1, cv::DataType<T>::type);
+			memcpy(out.data, vector.data(), vector.size()*sizeof(T));
+			return out;
+		}
+
 	};
 
 }
