@@ -436,8 +436,8 @@ namespace CppFW
 
 
 		stream << "function [node] = readList(fileID)\n";
-		stream << "\tnode = {};\n";
 		stream << "\tdirLength  = fread(fileID, 1, 'uint32');\n";
+		stream << "\tnode = cell(1, dirLength);\n";
 		stream << "\tfor i=1:dirLength\n";
 		stream << "\t\tnode{i} = readNode(fileID);\n";
 		stream << "\tend\n";
@@ -457,11 +457,13 @@ namespace CppFW
 
 
 		stream << "function [mat] = readMat(fileID)\n";
-		stream << "\ttype     = fread(fileID, 1, 'uint32');\n";
-		stream << "\tchannels = fread(fileID, 1, 'uint32');\n";
-		stream << "\trows     = fread(fileID, 1, 'uint32');\n";
-		stream << "\tcols     = fread(fileID, 1, 'uint32');\n";
-		stream << "\t           fread(fileID, 4, 'uint32');\n";
+
+		stream << "\tdata     = fread(fileID, 8, 'uint32=>uint32');\n";
+		stream << "\ttype     = data(1);\n";
+		stream << "\tchannels = data(2);\n";
+		stream << "\trows     = data(3);\n";
+		stream << "\tcols     = data(4);\n";
+		stream << "\t% data(5) - data(8) unused\n";
 
 #define MatlabSwtichType(X, Y) 	stream << "		case " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << " % OpenCV type for "#X"\n\t\t\tmat = fread(fileID, [cols rows], '"#Y"=>"#Y"')';\n";
 		stream << "	switch type\n";
