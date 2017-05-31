@@ -261,6 +261,11 @@ namespace CppFW
 		return str;
 	}
 
+	const std::string& CVMatTree::getStringOrEmpty() const
+	{
+		return str; // str is empty when other datatype is set
+	}
+
 
 
 	bool CVMatTree::operator==(const CppFW::CVMatTree& other) const

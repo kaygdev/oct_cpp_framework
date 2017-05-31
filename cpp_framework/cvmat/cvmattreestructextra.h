@@ -48,6 +48,21 @@ namespace CppFW
 			return out;
 		}
 
+		static std::string getStringOrEmpty(const CVMatTree* tree, const char* name)
+		{
+			if(!tree)
+				return std::string();
+
+			const CVMatTree* node = tree->getDirNodeOpt(name);
+			if(!node)
+				return std::string();
+
+			if(node->type() != CVMatTree::Type::String)
+				return std::string();
+
+			return node->getString();
+		}
+
 	};
 
 }

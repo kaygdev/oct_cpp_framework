@@ -44,12 +44,13 @@ namespace CppFW
 
 		std::size_t getNumElements() const;
 
-		cv::Mat& getMat();
+		      cv::Mat& getMat();
 		const cv::Mat& getMat() const;
 		const cv::Mat* getMatOpt() const;
 
-		std::string& getString();
+		      std::string& getString();
 		const std::string& getString() const;
+		const std::string& getStringOrEmpty() const;
 		
 		bool operator==(const CVMatTree& other) const;
 		bool operator!=(const CVMatTree& other) const            { return !operator==(other); }
