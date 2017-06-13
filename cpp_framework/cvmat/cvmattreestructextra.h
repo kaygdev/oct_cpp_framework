@@ -13,10 +13,10 @@ namespace CppFW
 
 
 		template<typename T>
-		static T getCvScalar(const CVMatTree* tree, const char* name, T defaultValue)
+		static T getCvScalar(const CVMatTree* tree, const char* name, T defaultValue, std::size_t index = 0)
 		{
 			if(tree)
-				return getCvScalar(tree->getDirNodeOpt(name), defaultValue);
+				return getCvScalar(tree->getDirNodeOpt(name), defaultValue, index);
 			return defaultValue;
 		}
 
@@ -29,6 +29,9 @@ namespace CppFW
 
 			const cv::Mat* mat = tree->getMatOpt();
 			if(!mat)
+				return defaultValue;
+
+			if(static_cast<std::size_t>(mat->rows*mat->cols) < index)
 				return defaultValue;
 
 			if(mat->type() == cv::DataType<T>::type)
