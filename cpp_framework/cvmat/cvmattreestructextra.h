@@ -11,6 +11,13 @@ namespace CppFW
 	{
 	public:
 
+		template<typename T>
+		static void setCvScalar(CVMatTree& tree, const char* name, T value)
+		{
+			cv::Mat& mat = tree.getDirNode(name).getMat();
+			mat.create(1, 1, cv::DataType<T>::type);
+			(*mat.ptr<T>(0)) = value;
+		}
 
 		template<typename T>
 		static T getCvScalar(const CVMatTree* tree, const char* name, T defaultValue, std::size_t index = 0)
