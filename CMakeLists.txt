@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 2.6)
 project(cpp_framework)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_module/)
 
-option(BUILD_UNIT_TESTS "build unit tests" OFF)
+set( CMAKE_CXX_STANDARD 11 )
+
+option(BUILD_UNIT_TESTS              "build unit tests"              OFF)
+option(BUILD_MATLAB_MEX_FUNCTIONS    "build matlab mex functions"    OFF)
+option(BUILD_OCTAVE_MEX_FUNCTIONS    "build octave mex functions"    OFF)
+option(BUILD_MEX_WITH_STATIC_CPP_LIB "build mex with static c++ lib" OFF)
 
 if(BUILD_UNIT_TESTS)
 	find_package(Boost COMPONENTS unit_test_framework filesystem system REQUIRED)
@@ -47,3 +53,28 @@ if(BUILD_UNIT_TESTS)
 	target_link_libraries(cpp_framework_test ${OpenCV_LIBRARIES})
 endif()
 
+
+if(BUILD_MATLAB_MEX_FUNCTIONS)
+	find_package(Matlab COMPONENTS MX_LIBRARY REQUIRED)
+
+	matlab_add_mex(NAME readbin SRC matlab/bin_format/readbin.cpp)
+	set_target_properties(readbin PROPERTIES COMPILE_DEFINITIONS "MEX_COMPILE")
+	if(BUILD_MEX_WITH_STATIC_CPP_LIB)
+		set_target_properties(readbin PROPERTIES LINK_FLAGS "-static-libstdc++")
+	endif()
+
+	target_include_directories(readbin SYSTEM PRIVATE ${Matlab_INCLUDE_DIRS} PUBLIC ${CMAKE_SOURCE_DIR}/src/)
+endif()
+
+
+if(BUILD_OCTAVE_MEX_FUNCTIONS)
+	find_package(Octave COMPONENTS MX_LIBRARY REQUIRED)
+
+	octave_add_oct(oct_readbin SOURCES matlab/bin_format/readbin.cpp EXTENSION mex)
+	set_target_properties(oct_readbin PROPERTIES COMPILE_DEFINITIONS "MEX_COMPILE")
+	if(BUILD_MEX_WITH_STATIC_CPP_LIB)
+		set_target_properties(oct_readbin PROPERTIES LINK_FLAGS "-static-libstdc++")
+	endif()
+	target_include_directories(oct_readbin SYSTEM PRIVATE ${OCTAVE_INCLUDE_DIRS} PUBLIC ${CMAKE_SOURCE_DIR}/src/)
+
+endif()

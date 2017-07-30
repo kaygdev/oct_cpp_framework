@@ -23,9 +23,9 @@ namespace CppFW
 
 
 		template<typename T>
-		inline void writeBin2Stream(std::ostream* stream, const T& value, std::size_t num = 1)
+		inline void writeBin2Stream(std::ostream* stream, const T value, std::size_t num = 1)
 		{
-			stream->write(reinterpret_cast<const char*>(&value), sizeof(T)*num);
+			stream->write(reinterpret_cast<const char*>(value), sizeof(T)*num);
 		}
 
 		inline void writeBin2Stream(std::ostream* stream, const std::string& value)
@@ -37,57 +37,61 @@ namespace CppFW
 		template<typename T>
 		inline void writeMatBin(std::ostream* stream, const cv::Mat& mat)
 		{
-			int channels = mat.channels();
+			const int channels = mat.channels();
+			const int cols     = mat.cols;
 			for(int i = 0; i < mat.rows; i++)
 			{
 				const T* mi = mat.ptr<T>(i);
-				for(int j = 0; j < mat.cols; j++)
-				{
-					for(int c = 0; c < channels; ++c)
-					{
-						writeBin2Stream(stream, *mi);
-						++mi;
-					}
-				}
+				stream->write(reinterpret_cast<const char*>(mi), sizeof(T)*cols*channels);
+// 				writeBin2Stream(stream, *mi, cols*channels);
+// 				for(int j = 0; j < cols; j++)
+// 				{
+// 					for(int c = 0; c < channels; ++c)
+// 					{
+// 						writeBin2Stream(stream, *mi);
+// 						++mi;
+// 					}
+// 				}
 			}
 		}
 
 		template<typename T>
-		inline void readBinStream(std::istream* stream, T& value, std::size_t num = 1)
+		inline void readBinStream(std::istream& stream, T* value, std::size_t num = 1)
 		{
-			stream->read(reinterpret_cast<char*>(&value), sizeof(T)*num);
+			stream.read(reinterpret_cast<char*>(value), sizeof(T)*num);
 		}
 
-		inline std::string readBinSting(std::istream* stream)
+
+		inline void readString(std::istream& stream, std::string& value, std::size_t length)
+		{
+			value.resize(length);
+			readBinStream<char>(stream, const_cast<std::string::value_type*>(value.data()), static_cast<std::size_t>(length)); // TODO: remove const_cast in C++17
+		}
+
+		inline void readBinStream(std::istream& stream, std::string& value)
+		{
+			uint32_t length;
+			readBinStream<uint32_t>(stream, &length);
+			readString(stream, value, length);
+		}
+
+		inline std::string readBinSting(std::istream& stream)
 		{
 			std::string value;
-			uint32_t length;
-			readBinStream<uint32_t>(stream, length);
-			char* buffer = new char[length];
-			readBinStream<char>(stream, *buffer, static_cast<std::size_t>(length));
-			value.assign(buffer, buffer+length);
+			readBinStream(stream, value);
 			return value;
 		}
 
 		template<typename T>
-		inline T readBinStream(std::istream* stream)
+		inline T readBinStream(std::istream& stream)
 		{
 			T value;
-			stream->read(reinterpret_cast<char*>(&value), sizeof(T));
+			readBinStream(stream, &value, 1);
 			return value;
 		}
 
-		inline void readBinStream(std::istream* stream, std::string& value)
-		{
-			uint32_t length;
-			readBinStream<uint32_t>(stream, length);
-			char* buffer = new char[length];
-			readBinStream<char>(stream, *buffer, static_cast<std::size_t>(length));
-			value.assign(buffer, buffer+length);
-		}
-
 		template<typename T>
-		inline void readMatBin(std::istream* stream, cv::Mat& mat)
+		inline void readMatBin(std::istream& stream, cv::Mat& mat)
 		{
 			int channels = mat.channels();
 			for(int i = 0; i < mat.rows; i++)
@@ -97,7 +101,7 @@ namespace CppFW
 				{
 					for(int c = 0; c < channels; ++c)
 					{
-						readBinStream(stream, *mi);
+						readBinStream(stream, mi);
 						++mi;
 					}
 				}
@@ -182,10 +186,10 @@ namespace CppFW
 	bool CVMatTreeStructBin::readDir(CVMatTree& node)
 	{
 		bool ret = true;
-		uint32_t dirLength = readBinStream<uint32_t>(istream);
+		uint32_t dirLength = readBinStream<uint32_t>(*istream);
 		for(uint32_t i=0; i<dirLength; ++i)
 		{
-			std::string name = readBinSting(istream);
+			std::string name = readBinSting(*istream);
 
 			ret &= handleNodeRead(node.getDirNode(name));
 		}
@@ -207,7 +211,7 @@ namespace CppFW
 	bool CVMatTreeStructBin::readList(CVMatTree& node)
 	{
 		bool ret = true;
-		uint32_t listLength = readBinStream<uint32_t>(istream);
+		uint32_t listLength = readBinStream<uint32_t>(*istream);
 		for(uint32_t i=0; i<listLength; ++i)
 		{
 			ret &= handleNodeRead(node.newListNode());
@@ -244,7 +248,7 @@ namespace CppFW
 	{
 		assert(node.type() == CVMatTree::Type::Undef);
 		
-		uint32_t type = readBinStream<uint32_t>(istream);
+		uint32_t type = readBinStream<uint32_t>(*istream);
 		switch(static_cast<CVMatTree::Type>(type))
 		{
 			case CVMatTree::Type::Undef:
@@ -263,7 +267,7 @@ namespace CppFW
 
 	bool CVMatTreeStructBin::readString(std::string& str)
 	{
-		str = readBinSting(istream);
+		str = readBinSting(*istream);
 		return true;
 	}
 
@@ -292,15 +296,15 @@ namespace CppFW
 		if(std::memcmp(magic, readmagic, sizeof(magic)-1) != 0)
 			return false;
 
-		uint32_t readedVersion = readBinStream<uint32_t>(istream);
+		uint32_t readedVersion = readBinStream<uint32_t>(*istream);
 		if(version != readedVersion)
 			return false;
 		
 		uint32_t tmp;
-		readBinStream<uint32_t>(istream, tmp);
-		readBinStream<uint32_t>(istream, tmp);
-		readBinStream<uint32_t>(istream, tmp);
-		readBinStream<uint32_t>(istream, tmp);
+		readBinStream<uint32_t>(*istream, &tmp);
+		readBinStream<uint32_t>(*istream, &tmp);
+		readBinStream<uint32_t>(*istream, &tmp);
+		readBinStream<uint32_t>(*istream, &tmp);
 		return true;
 	}
 
@@ -338,18 +342,18 @@ namespace CppFW
 
 	bool CVMatTreeStructBin::readMatP(cv::Mat& mat)
 	{
-		uint32_t type     = readBinStream<uint32_t>(istream);
-		uint32_t channels = readBinStream<uint32_t>(istream);
+		uint32_t type     = readBinStream<uint32_t>(*istream);
+		uint32_t channels = readBinStream<uint32_t>(*istream);
 
-		uint32_t rows     = readBinStream<uint32_t>(istream);
-		uint32_t cols     = readBinStream<uint32_t>(istream);
+		uint32_t rows     = readBinStream<uint32_t>(*istream);
+		uint32_t cols     = readBinStream<uint32_t>(*istream);
 
-		readBinStream<uint32_t>(istream);
-		readBinStream<uint32_t>(istream);
-		readBinStream<uint32_t>(istream);
-		readBinStream<uint32_t>(istream);
+		readBinStream<uint32_t>(*istream);
+		readBinStream<uint32_t>(*istream);
+		readBinStream<uint32_t>(*istream);
+		readBinStream<uint32_t>(*istream);
 
-	#define HandleType(X) case cv::DataType<X>::type: mat.create(rows, cols, CV_MAKETYPE(cv::DataType<X>::depth, channels)); readMatBin<X>(istream, mat); break;
+	#define HandleType(X) case cv::DataType<X>::type: mat.create(rows, cols, CV_MAKETYPE(cv::DataType<X>::depth, channels)); readMatBin<X>(*istream, mat); break;
 		switch(type)
 		{
 			HandleType(uint8_t)
