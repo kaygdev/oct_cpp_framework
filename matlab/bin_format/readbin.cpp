@@ -112,7 +112,7 @@ mxArray* readList(std::istream& stream)
 {
 	const uint32_t dirLength = readBinStream<uint32_t>(stream);
 
-	mxArray* mxarr = mxCreateCellMatrix(dirLength, 1);
+	mxArray* mxarr = mxCreateCellMatrix(1, dirLength);
 	for(uint32_t i = 0; i<dirLength; ++i)
 		mxSetCell(mxarr, i, readNode(stream));
 
