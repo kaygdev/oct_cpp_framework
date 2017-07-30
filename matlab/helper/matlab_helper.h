@@ -9,6 +9,55 @@
 #include <tuple>
 
 
+template<typename T>
+void transposeMatlabMatrix(mxArray* matlabMat)
+{
+	if(!matlabMat)
+	{
+		mexPrintf("matlabMat == nullptr\n");
+		return;
+	}
+
+	if(mxGetClassID(matlabMat) != MatlabType<T>::classID)
+	{
+		mexPrintf("Transpose Matrix: Wrong ClassID: %d != %d\n", mxGetClassID(matlabMat), MatlabType<T>::classID);
+		return;
+	}
+
+	if(mxGetNumberOfDimensions(matlabMat) != 2)
+	{
+		mexPrintf("Transpose Matrix: not 2D matrix : %d\n", mxGetNumberOfDimensions(matlabMat));
+		return;
+	}
+
+	const mwSize m = mxGetM(matlabMat);
+	const mwSize n = mxGetN(matlabMat);
+
+
+	if(m != 1 && n != 1)
+	{
+		const T* const dataSource = reinterpret_cast<T*>(mxGetData(matlabMat));
+		      T* const dataDest   = reinterpret_cast<T*>(mxCalloc(m*n, sizeof(T)));
+
+		const T* sourceIt = dataSource;
+
+			for(mwSize j = 0; j < n; ++j)
+		{
+		for(mwSize i = 0; i < m; ++i)
+			{
+				dataDest[i*n + j] = *sourceIt;
+				++sourceIt;
+			}
+		}
+
+		mxSetData(matlabMat, dataDest);
+		mxFree(const_cast<T*>(dataSource));
+	}
+
+	mxSetM(matlabMat, n);
+	mxSetN(matlabMat, m);
+}
+
 
 template<typename T>
 void createMatlabVector(const std::vector<T>& vec, mxArray*& matlabMat)

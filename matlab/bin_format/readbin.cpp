@@ -129,13 +129,16 @@ mxArray* readString(std::istream& stream)
 template<typename T>
 mxArray* readMat(std::istream& stream, uint32_t rows, uint32_t cols)
 {
-	mxArray* matlabMat = mxCreateNumericMatrix(rows, cols, MatlabType<T>::classID, mxREAL);
+	mxArray* matlabMat = mxCreateNumericMatrix(cols, rows, MatlabType<T>::classID, mxREAL);
+// 	mxArray* matlabMat = mxCreateNumericMatrix(rows, cols, MatlabType<T>::classID, mxREAL);
 
 	if(!matlabMat)
 		return nullptr;
 
 	T* matlabPtr = reinterpret_cast<T*>(mxGetPr(matlabMat));
 	readBinStream(stream, matlabPtr, rows*cols);
+
+	transposeMatlabMatrix<T>(matlabMat);
 
 	return matlabMat;
 }
@@ -167,13 +170,6 @@ mxArray* readMat(std::istream& stream)
 			return nullptr;
 	}
 }
-
-
-
-const char     magic[] = "CVMatBin";
-#include<cstring>
-
-
 
 void mexFunction(int            nlhs  ,
                  mxArray*       plhs[],
