@@ -130,7 +130,6 @@ template<typename T>
 mxArray* readMat(std::istream& stream, uint32_t rows, uint32_t cols)
 {
 	mxArray* matlabMat = mxCreateNumericMatrix(cols, rows, MatlabType<T>::classID, mxREAL);
-// 	mxArray* matlabMat = mxCreateNumericMatrix(rows, cols, MatlabType<T>::classID, mxREAL);
 
 	if(!matlabMat)
 		return nullptr;
@@ -139,7 +138,6 @@ mxArray* readMat(std::istream& stream, uint32_t rows, uint32_t cols)
 	readBinStream(stream, matlabPtr, rows*cols);
 
 	transposeMatlabMatrix<T>(matlabMat);
-
 	return matlabMat;
 }
 

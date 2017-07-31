@@ -25,7 +25,7 @@ namespace CppFW
 		template<typename T>
 		inline void writeBin2Stream(std::ostream* stream, const T value, std::size_t num = 1)
 		{
-			stream->write(reinterpret_cast<const char*>(value), sizeof(T)*num);
+			stream->write(reinterpret_cast<const char*>(&value), sizeof(T)*num);
 		}
 
 		inline void writeBin2Stream(std::ostream* stream, const std::string& value)
