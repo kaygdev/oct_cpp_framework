@@ -78,3 +78,4 @@ if(BUILD_OCTAVE_MEX_FUNCTIONS)
 	target_include_directories(oct_readbin SYSTEM PRIVATE ${OCTAVE_INCLUDE_DIRS} PUBLIC ${CMAKE_SOURCE_DIR}/src/)
 
 endif()
+
