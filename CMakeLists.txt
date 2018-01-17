@@ -21,6 +21,7 @@ find_package(OpenCV REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/cpp_framework/)
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Wunreachable-code -Werror ${CMAKE_CXX_FLAGS_DEBUG}")        ## -Weverything

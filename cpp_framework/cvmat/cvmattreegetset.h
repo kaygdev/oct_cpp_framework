@@ -34,12 +34,12 @@ namespace CppFW
 		const CVMatTree& tree;
 
 		template<typename T>
-		void setValue(CVMatTree& t, T& value)
+		void setValue(const CVMatTree& t, T& value)
 		{
-			value = CVMatTreeExtra::getCvScalar(t, value);
+			value = CVMatTreeExtra::getCvScalar(&t, value);
 		}
 
-		void setValue(CVMatTree& t, std::string& value)
+		void setValue(const CVMatTree& t, std::string& value)
 		{
 			value = t.getString();
 		}
