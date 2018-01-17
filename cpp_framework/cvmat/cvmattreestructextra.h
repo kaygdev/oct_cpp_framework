@@ -12,11 +12,19 @@ namespace CppFW
 	public:
 
 		template<typename T>
-		static void setCvScalar(CVMatTree& tree, const char* name, T value)
+		static void setCvScalar(CVMatTree& tree, T value)
 		{
-			cv::Mat& mat = tree.getDirNode(name).getMat();
+			static_assert(cv::DataType<T>::generic_type == false);
+
+			cv::Mat& mat = tree.getMat();
 			mat.create(1, 1, cv::DataType<T>::type);
 			(*mat.ptr<T>(0)) = value;
+		}
+
+		template<typename T>
+		static void setCvScalar(CVMatTree& tree, const char* name, T value)
+		{
+			setCvScalar(tree.getDirNode(name), value);
 		}
 
 		template<typename T>
