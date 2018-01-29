@@ -27,6 +27,11 @@ namespace CppFW
 			CVMatTree& node = tree.getDirNode(name);
 			node.getString() = value;
 		}
+
+		SetToCVMatTree subSet(const std::string& name)
+		{
+			return SetToCVMatTree(tree.getDirNode(name));
+		}
 	};
 
 	class GetFromCVMatTree
