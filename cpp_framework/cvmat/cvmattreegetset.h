@@ -36,7 +36,7 @@ namespace CppFW
 
 	class GetFromCVMatTree
 	{
-		const CVMatTree& tree;
+		const CVMatTree* tree;
 
 		template<typename T>
 		void setValue(const CVMatTree& t, T& value)
@@ -49,14 +49,26 @@ namespace CppFW
 			value = t.getString();
 		}
 	public:
-		GetFromCVMatTree(const CVMatTree& tree) : tree(tree) {}
+		GetFromCVMatTree(const CVMatTree* tree) : tree( tree) {}
+		GetFromCVMatTree(const CVMatTree& tree) : tree(&tree) {}
 
 		template<typename T>
 		void operator()(const std::string& name, T& value)
 		{
-			const CVMatTree* node = tree.getDirNodeOpt(name.c_str());
-			if(node)
-				setValue(*node, value);
+			if(tree)
+			{
+				const CVMatTree* node = tree->getDirNodeOpt(name.c_str());
+				if(node)
+					setValue(*node, value);
+			}
+		}
+
+
+		GetFromCVMatTree subSet(const std::string& name)
+		{
+			if(tree)
+				return GetFromCVMatTree(tree->getDirNodeOpt(name.c_str()));
+			return GetFromCVMatTree(nullptr);
 		}
 
 	};
