@@ -14,7 +14,7 @@ namespace CppFW
 		template<typename T>
 		static void setCvScalar(CVMatTree& tree, T value)
 		{
-			static_assert(cv::DataType<T>::generic_type == false);
+			static_assert(cv::DataType<T>::generic_type == false, "non generic datatype");
 
 			cv::Mat& mat = tree.getMat();
 			mat.create(1, 1, cv::DataType<T>::type);
