@@ -22,7 +22,7 @@ namespace CppFW
 		}
 
 		template<typename T>
-		static void setCvScalar(CVMatTree& tree, const char* name, T value)
+		static void setCvScalar(CVMatTree& tree, const std::string& name, T value)
 		{
 			setCvScalar(tree.getDirNode(name), value);
 		}
