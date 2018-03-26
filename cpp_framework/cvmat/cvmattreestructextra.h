@@ -52,6 +52,20 @@ namespace CppFW
 			if(mat->type() == cv::DataType<T>::type)
 				return *(mat->ptr<T>(0) + index);
 
+
+			switch(mat->type())
+			{
+#define handleType(TYPE) case cv::DataType<TYPE>::type: return cv::saturate_cast<T>(*(mat->ptr<TYPE>(0) + index));
+// 				case cv::DataType<int>::type: return cv::saturate_cast<T>(*(mat->ptr<int>(0) + index));
+				handleType(int8_t);
+				handleType(int16_t);
+				handleType(int32_t);
+				handleType(uint8_t);
+				handleType(uint16_t);
+				handleType(uint32_t);
+#undef handleType
+			}
+
 // 			cv::Mat t = (*mat)(cv::Range(0, 1), cv::Range(0, 1));
 			cv::Mat conv;
 			mat->convertTo(conv, cv::DataType<T>::type); // TODO: convert-funktion ersetzen

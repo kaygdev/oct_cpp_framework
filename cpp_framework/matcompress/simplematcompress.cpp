@@ -1,5 +1,9 @@
 #include "simplematcompress.h"
 
+#include"../cvmat/cvmattreestruct.h"
+
+#include<opencv/cv.hpp>
+#include <cvmat/cvmattreestructextra.h>
 
 namespace CppFW
 {
@@ -109,4 +113,68 @@ namespace CppFW
 		    && segmentsChange == other.segmentsChange;
 	}
 
+
+
+
+	bool SimpleMatCompress::fromCVMatTree(const CppFW::CVMatTree& imgCompressNode)
+	{
+		int imageHeight = CppFW::CVMatTreeExtra::getCvScalar(&imgCompressNode, "height", uint32_t());
+		int imageWidth  = CppFW::CVMatTreeExtra::getCvScalar(&imgCompressNode, "width" , uint32_t());
+		const cv::Mat& compressSymbols   = imgCompressNode.getDirNode("compressSymbols")  .getMat();
+		const cv::Mat& compressRunLength = imgCompressNode.getDirNode("compressRunLength").getMat();
+
+
+		if(cv::DataType<uint8_t> ::type != compressSymbols  .type()
+		|| cv::DataType<uint32_t>::type != compressRunLength.type())
+			return false;
+
+		if(compressSymbols.rows*compressSymbols.cols != compressRunLength.rows*compressRunLength.cols)
+			return false;
+
+		const int compDataLength = compressSymbols.rows*compressSymbols.cols;
+
+		const uint8_t * compSymbolPtr = compressSymbols  .ptr<uint8_t >();
+		const uint32_t* compRunLenPtr = compressRunLength.ptr<uint32_t>();
+
+		segmentsChange.clear();
+		segmentsChange.reserve(compDataLength);
+		for(int i = 0; i < compDataLength; ++i)
+		{
+			uint8_t  symbol = *compSymbolPtr;
+			uint32_t number = *compRunLenPtr;
+
+			segmentsChange.emplace_back(number, symbol);
+
+			++compSymbolPtr;
+			++compRunLenPtr;
+		}
+
+		rows = imageHeight;
+		cols = imageWidth ;
+
+		return true;
+	}
+
+	void SimpleMatCompress::toCVMatTree(CppFW::CVMatTree& imgCompressNode) const
+	{
+		cv::Mat compressSymbols   = cv::Mat(1, segmentsChange.size(), cv::DataType<uint8_t> ::type);
+		cv::Mat compressRunLength = cv::Mat(1, segmentsChange.size(), cv::DataType<uint32_t>::type);
+
+		uint8_t * compSymbolPtr = compressSymbols  .ptr<uint8_t >();
+		uint32_t* compRunLenPtr = compressRunLength.ptr<uint32_t>();
+		for(const MatSegment& segment : segmentsChange)
+		{
+			*compSymbolPtr = segment.value;
+			*compRunLenPtr = segment.length;
+
+			++compSymbolPtr;
+			++compRunLenPtr;
+		}
+
+		imgCompressNode.clear();
+		CppFW::CVMatTreeExtra::setCvScalar(imgCompressNode, "height", rows);
+		CppFW::CVMatTreeExtra::setCvScalar(imgCompressNode, "width" , cols);
+		imgCompressNode.getDirNode("compressSymbols")  .getMat() = compressSymbols  ;
+		imgCompressNode.getDirNode("compressRunLength").getMat() = compressRunLength;
+	}
 }

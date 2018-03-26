@@ -8,6 +8,8 @@
 
 namespace CppFW
 {
+	class CVMatTree;
+
 	class SimpleMatCompress
 	{
 		friend class boost::serialization::access;
@@ -70,6 +72,9 @@ namespace CppFW
 
 		bool isEqual(const uint8_t* mat, int rows, int cols) const;
 		bool operator==(const SimpleMatCompress& other) const;
+
+		bool fromCVMatTree(const CVMatTree& imgCompressNode);
+		void toCVMatTree(CVMatTree& imgCompressNode) const;
 	};
 }
 
