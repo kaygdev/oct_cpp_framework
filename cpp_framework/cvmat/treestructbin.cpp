@@ -311,7 +311,7 @@ namespace CppFW
 
 	void CVMatTreeStructBin::writeMatP(const cv::Mat& mat)
 	{
-		writeBin2Stream<uint32_t>(ostream, mat.type());
+		writeBin2Stream<uint32_t>(ostream, mat.depth());
 		writeBin2Stream<uint32_t>(ostream, mat.channels());
 
 		writeBin2Stream<uint32_t>(ostream, mat.rows);
@@ -323,7 +323,7 @@ namespace CppFW
 		writeBin2Stream<uint32_t>(ostream, 0);
 
 	#define HandleType(X) case cv::DataType<X>::type: writeMatBin<X>(ostream, mat); break;
-		switch(mat.type())
+		switch(mat.depth())
 		{
 			HandleType(uint8_t)
 			HandleType(uint16_t)
@@ -336,7 +336,7 @@ namespace CppFW
 			HandleType(float)
 			HandleType(double)
 			default:
-				std::cerr << "writeMatP: Unhandled Mat-Type";
+				std::cerr << "writeMatP: Unhandled Mat-Type: " << mat.type() << " depth: " << mat.depth() << " channels: " << mat.channels() << '\n';
 		}
 	#undef HandleType
 	}
@@ -344,7 +344,7 @@ namespace CppFW
 
 	bool CVMatTreeStructBin::readMatP(cv::Mat& mat)
 	{
-		uint32_t type     = readBinStream<uint32_t>(*istream);
+		uint32_t depth     = readBinStream<uint32_t>(*istream);
 		uint32_t channels = readBinStream<uint32_t>(*istream);
 
 		uint32_t rows     = readBinStream<uint32_t>(*istream);
@@ -356,7 +356,7 @@ namespace CppFW
 		readBinStream<uint32_t>(*istream);
 
 	#define HandleType(X) case cv::DataType<X>::type: mat.create(rows, cols, CV_MAKETYPE(cv::DataType<X>::depth, channels)); readMatBin<X>(*istream, mat); break;
-		switch(type)
+		switch(depth)
 		{
 			HandleType(uint8_t)
 			HandleType(uint16_t)
@@ -367,7 +367,7 @@ namespace CppFW
 			HandleType(float)
 			HandleType(double)
 			default:
-				std::cerr << "readMatP: Unhandled Mat-Type";
+				std::cerr << "readMatP: Unhandled Mat-Type: " << depth << '\n';
 				return false;
 		}
 	#undef HandleType
@@ -465,14 +465,14 @@ namespace CppFW
 		stream << "function [mat] = readMat(fileID)\n";
 
 		stream << "\tdata     = fread(fileID, 8, 'uint32=>uint32');\n";
-		stream << "\ttype     = data(1);\n";
+		stream << "\tdepth    = data(1);\n";
 		stream << "\tchannels = data(2);\n";
 		stream << "\trows     = data(3);\n";
 		stream << "\tcols     = data(4);\n";
 		stream << "\t% data(5) - data(8) unused\n";
 
-#define MatlabSwtichType(X, Y) 	stream << "		case " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << " % OpenCV type for "#X"\n\t\t\tmat = fread(fileID, [cols rows], '"#Y"=>"#Y"')';\n";
-		stream << "	switch type\n";
+#define MatlabSwtichType(X, Y) 	stream << "		case " << boost::lexical_cast<std::string>(cv::DataType<X>::depth) << " % OpenCV type for "#X"\n\t\t\tmat = fread(fileID, [cols rows*channels], '"#Y"=>"#Y"')';\n";
+		stream << "	switch depth\n";
 		MatlabSwtichType(uint8_t , uint8 )
 		MatlabSwtichType(uint16_t, uint16)
 		MatlabSwtichType(uint32_t, uint32)
@@ -486,7 +486,13 @@ namespace CppFW
 #undef MatlabSwtichType
 
 		stream << "\tend\n";
-		stream << "end\n";
+
+		stream << "\tif channels > 1";
+		stream << "\n\t\tA = reshape(mat', [channels cols*rows]);";
+		stream << "\n\t\tB = reshape(A', [cols, rows, channels]);";
+		stream << "\n\t\tmat = permute(B, [2,1,3]);";
+		stream << "\n\tend";
+		stream << "\nend\n";
 	}
 
 
@@ -580,7 +586,7 @@ namespace CppFW
 		stream << "function [] = writeMat(fileID, mat)\n";
 
 
-#define MatlabSwtichType(STR, X, Y) 	stream << "	" STR"if isa(mat, '"#Y"')\n\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<X>::type) << "';\n";
+#define MatlabSwtichType(STR, X, Y) 	stream << "	" STR"if isa(mat, '"#Y"')\n\t\tdepth = " << boost::lexical_cast<std::string>(cv::DataType<X>::depth) << "';\n";
 		MatlabSwtichType(""    , uint8_t , uint8 )
 		MatlabSwtichType("else", uint16_t, uint16)
 		MatlabSwtichType("else", uint32_t, uint32)
@@ -593,15 +599,15 @@ namespace CppFW
 		MatlabSwtichType("else", double  , double)
 #undef MatlabSwtichType
 		stream << "\telse\n\t\tfprintf('unhandled matrics format, convert to double\\n');\n\t\tmat = double(mat);\n";
-		stream << "\t\ttype = " << boost::lexical_cast<std::string>(cv::DataType<double>::type) << "';\n";
+		stream << "\t\tdepth = " << boost::lexical_cast<std::string>(cv::DataType<double>::depth) << "';\n";
 		stream << "\tend\n\n";
 
 		stream << "\t[rows, cols] = size(mat);\n";
 
-		stream << "\tfwrite(fileID, type, 'uint32');\n";
-		stream << "\tfwrite(fileID, 1   , 'uint32');\n";
-		stream << "\tfwrite(fileID, rows, 'uint32');\n"; // transpose!
-		stream << "\tfwrite(fileID, cols, 'uint32');\n";
+		stream << "\tfwrite(fileID, depth, 'uint32');\n";
+		stream << "\tfwrite(fileID, 1    , 'uint32');\n";
+		stream << "\tfwrite(fileID, rows , 'uint32');\n"; // transpose!
+		stream << "\tfwrite(fileID, cols , 'uint32');\n";
 		stream << "\tfwrite(fileID, [0,0,0,0], 'uint32');\n\n";
 
 #define MatlabSwtichType(STR, X) stream << "	" STR"if isa(mat, '"#X"')\n\t\tfwrite(fileID, mat', '"#X"')';\n";
