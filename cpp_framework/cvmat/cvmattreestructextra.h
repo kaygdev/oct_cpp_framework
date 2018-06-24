@@ -80,6 +80,44 @@ namespace CppFW
 			return out;
 		}
 
+		template<typename MatType, typename VecType>
+		static void convertMat2Vec(const cv::Mat& mat, std::vector<VecType>& vector)
+		{
+			std::size_t size = static_cast<std::size_t>(mat.cols)*static_cast<std::size_t>(mat.rows);
+			vector.resize(size);
+			std::transform(mat.ptr<MatType>(), mat.ptr<MatType>()+size, vector.begin(), [](MatType val){ return static_cast<VecType>(val); });
+		}
+
+
+		template<typename T>
+		static std::vector<T> getCvVector(const CVMatTree* tree)
+		{
+			std::vector<T> vec;
+			if(!tree)
+				return vec;
+
+			const cv::Mat* mat = tree->getMatOpt();
+			if(!mat)
+				return vec;
+
+			switch(mat->type())
+			{
+#define handleType(TYPE) case cv::DataType<TYPE>::type: convertMat2Vec<TYPE, T>(*mat, vec); break;
+				handleType(int8_t);
+				handleType(int16_t);
+				handleType(int32_t);
+				handleType(uint8_t);
+				handleType(uint16_t);
+				handleType(uint32_t);
+				handleType(float);
+				handleType(double);
+#undef handleType
+			}
+
+			return vec;
+		}
+
+
 		static std::string getStringOrEmpty(const CVMatTree* tree, const char* name)
 		{
 			if(!tree)

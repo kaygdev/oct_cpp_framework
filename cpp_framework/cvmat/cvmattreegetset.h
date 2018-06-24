@@ -20,6 +20,13 @@ namespace CppFW
 			CVMatTreeExtra::setCvScalar(node, value);
 		}
 
+		template<typename T>
+		void operator()(const std::string& name, const std::vector<T>& value)
+		{
+			CVMatTree& node = tree.getDirNode(name);
+			node.getMat() = CVMatTreeExtra::convertVector2Mat<T>(value);
+		}
+
 		void operator()(const std::string& name, const std::string& value)
 		{
 			if(value.empty())
@@ -42,6 +49,12 @@ namespace CppFW
 		void setValue(const CVMatTree& t, T& value)
 		{
 			value = CVMatTreeExtra::getCvScalar(&t, value);
+		}
+
+		template<typename T>
+		void setValue(const CVMatTree& t, std::vector<T>& value)
+		{
+			value = CVMatTreeExtra::getCvVector<T>(&t);
 		}
 
 		void setValue(const CVMatTree& t, std::string& value)
