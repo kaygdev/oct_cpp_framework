@@ -1,5 +1,7 @@
 // only for build
 
-#include"unzip.c"
+#ifdef WITH_ZLIB
+	#include"unzip.c"
+#endif
 
 

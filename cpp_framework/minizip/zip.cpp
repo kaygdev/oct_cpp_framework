@@ -1,4 +1,6 @@
 // only for build
 
-#include"zip.c"
+#ifdef WITH_ZLIB
+	#include"zip.c"
+#endif
 

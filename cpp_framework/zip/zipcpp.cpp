@@ -3,6 +3,7 @@
 #include<minizip/zip.h>
 
 
+#ifdef WITH_ZLIB
 namespace CppFW
 {
 
@@ -20,7 +21,6 @@ namespace CppFW
 
 	void ZipCpp::addFile(const std::string& zipPath, const char* buff, std::size_t bufflen, bool compress)
 	{
-
 		zip_fileinfo zinfo{};
 
 		/*int code = */zipOpenNewFileInZip(file,
@@ -37,5 +37,17 @@ namespace CppFW
 		zipWriteInFileInZip(file, buff, static_cast<unsigned>(bufflen));
 		zipCloseFileInZip(file);
 	}
-
 }
+#else
+namespace CppFW
+{
+	ZipCpp::ZipCpp(const std::string& /*filename*/)
+	{
+		throw("not build with zlib");
+	}
+	ZipCpp::~ZipCpp() {}
+
+	void ZipCpp::addFile(const std::string& /*zipPath*/, const char* /*buff*/, std::size_t /*bufflen*/, bool /*compress*/) {}
+}
+
+#endif

@@ -8,6 +8,7 @@ option(BUILD_UNIT_TESTS              "build unit tests"              OFF)
 option(BUILD_MATLAB_MEX_FUNCTIONS    "build matlab mex functions"    OFF)
 option(BUILD_OCTAVE_MEX_FUNCTIONS    "build octave mex functions"    OFF)
 option(BUILD_MEX_WITH_STATIC_CPP_LIB "build mex with static c++ lib" OFF)
+option(BUILD_WITH_ZLIB               "build the programms with ZLIB" ON)
 
 if(BUILD_UNIT_TESTS)
 	find_package(Boost COMPONENTS unit_test_framework filesystem system REQUIRED)
@@ -17,6 +18,12 @@ endif()
 
 find_package(OpenCV REQUIRED)
 
+
+if(BUILD_WITH_ZLIB)
+	find_package(ZLIB REQUIRED)
+	include_directories(${ZLIB_INCLUDE_DIRS})
+	add_definitions(-DWITH_ZLIB)
+endif()
 
 
 include_directories(${CMAKE_SOURCE_DIR}/cpp_framework/)

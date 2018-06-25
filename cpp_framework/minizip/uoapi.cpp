@@ -1,5 +1,7 @@
 // only for build
 
-#include"ioapi.c"
+#ifdef WITH_ZLIB
+	#include"ioapi.c"
+#endif
 
 

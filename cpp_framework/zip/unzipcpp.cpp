@@ -1,17 +1,15 @@
 #include "unzipcpp.h"
 
+#ifdef WITH_ZLIB
 #include<minizip/unzip.h>
 
 
 namespace CppFW
 {
-
 	UnzipCpp::UnzipCpp(const std::string& filename)
 	{
-
 		file = unzOpen(filename.c_str());
 	}
-
 
 	UnzipCpp::~UnzipCpp()
 	{
@@ -34,6 +32,18 @@ namespace CppFW
 
 		return fileBuffer;
 	}
-
-
 }
+#else
+namespace CppFW
+{
+	UnzipCpp::UnzipCpp(const std::string& /*filename*/)
+	{
+		throw("not build with zlib");
+	}
+
+	UnzipCpp::~UnzipCpp() {}
+
+	std::vector<char> UnzipCpp::readFile(const std::string& /*zipPath*/) { return std::vector<char>(); }
+}
+#endif
+
