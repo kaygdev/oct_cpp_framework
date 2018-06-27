@@ -602,12 +602,18 @@ namespace CppFW
 		stream << "\t\tdepth = " << boost::lexical_cast<std::string>(cv::DataType<double>::depth) << "';\n";
 		stream << "\tend\n\n";
 
-		stream << "\t[rows, cols] = size(mat);\n";
+		stream << "\t[rows, cols, channels] = size(mat);\n";
 
-		stream << "\tfwrite(fileID, depth, 'uint32');\n";
-		stream << "\tfwrite(fileID, 1    , 'uint32');\n";
-		stream << "\tfwrite(fileID, rows , 'uint32');\n"; // transpose!
-		stream << "\tfwrite(fileID, cols , 'uint32');\n";
+
+		stream << "\n\tif(channels > 1)";
+		stream << "\n\t\tA = permute(mat, [2,1,3]);";
+		stream << "\n\t\tmat = reshape(A, [cols*rows channels]);";
+		stream << "\n\tend\n\n";
+
+		stream << "\tfwrite(fileID, depth   , 'uint32');\n";
+		stream << "\tfwrite(fileID, channels, 'uint32');\n";
+		stream << "\tfwrite(fileID, rows    , 'uint32');\n"; // transpose!
+		stream << "\tfwrite(fileID, cols    , 'uint32');\n";
 		stream << "\tfwrite(fileID, [0,0,0,0], 'uint32');\n\n";
 
 #define MatlabSwtichType(STR, X) stream << "	" STR"if isa(mat, '"#X"')\n\t\tfwrite(fileID, mat', '"#X"')';\n";
