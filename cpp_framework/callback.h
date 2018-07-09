@@ -38,6 +38,9 @@ namespace CppFW
 		CallbackSubTaskCreator(Callback* callback, std::size_t numTasks) : callback(callback), taskSize(1./static_cast<double>(numTasks)) {}
 		Callback getSubTaskCallback()
 		{
+			if(!callback)
+				return Callback();
+
 			double actCallbackPos = actTask*taskSize;
 			callback->callback(actCallbackPos);
 			actTask += 1;
