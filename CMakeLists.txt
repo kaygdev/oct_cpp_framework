@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
-project(cpp_framework)
+project(oct_cpp_framework)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_module/)
 
-set( CMAKE_CXX_STANDARD 11 )
+set(CMAKE_CXX_STANDARD 11)
+
+
+set(CppOctFramework_VERSION 1.0.0)
+set(CMAKE_DEBUG_POSTFIX "-d")
 
 option(BUILD_UNIT_TESTS              "build unit tests"              OFF)
 option(BUILD_MATLAB_MEX_FUNCTIONS    "build matlab mex functions"    OFF)
@@ -26,7 +30,7 @@ if(BUILD_WITH_ZLIB)
 endif()
 
 
-include_directories(${CMAKE_SOURCE_DIR}/cpp_framework/)
+include_directories(${CMAKE_SOURCE_DIR}/oct_cpp_framework/)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -40,25 +44,24 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 
-file(GLOB sources_b "${CMAKE_CURRENT_SOURCE_DIR}/cpp_framework/*.cpp")
-file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/cpp_framework/**/*.cpp")
+file(GLOB sources_b "${CMAKE_CURRENT_SOURCE_DIR}/oct_cpp_framework/*.cpp")
+file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/oct_cpp_framework/**/*.cpp")
 
 list(APPEND sources ${sources_b})
 
 
-
-add_library(cpp_framework ${sources})
+add_library(oct_cpp_framework ${sources})
 
 
 if(BUILD_UNIT_TESTS)
 	ADD_DEFINITIONS(-DBOOST_TEST_DYN_LINK)
 
 	file(GLOB sources_test "${CMAKE_CURRENT_SOURCE_DIR}/src_tests/*.cpp")
-	add_executable(cpp_framework_test main.cpp ${sources_test})
+	add_executable(oct_cpp_framework_test main.cpp ${sources_test})
 
-	target_link_libraries(cpp_framework_test ${Boost_LIBRARIES} )
-	target_link_libraries(cpp_framework_test cpp_framework)
-	target_link_libraries(cpp_framework_test ${OpenCV_LIBRARIES})
+	target_link_libraries(oct_cpp_framework_test ${Boost_LIBRARIES} )
+	target_link_libraries(oct_cpp_framework_test oct_cpp_framework)
+	target_link_libraries(oct_cpp_framework_test ${OpenCV_LIBRARIES})
 endif()
 
 
@@ -87,3 +90,72 @@ if(BUILD_OCTAVE_MEX_FUNCTIONS)
 
 endif()
 
+
+
+
+set_property(TARGET oct_cpp_framework PROPERTY VERSION ${CppOctFramework_VERSION})
+set_property(TARGET oct_cpp_framework PROPERTY SOVERSION 1)
+set_property(TARGET oct_cpp_framework PROPERTY INTERFACE_oct_cpp_framework_MAJOR_VERSION 1)
+set_property(TARGET oct_cpp_framework APPEND PROPERTY COMPATIBLE_INTERFACE_STRING octcppframework_MAJOR_VERSION)
+
+install(TARGETS oct_cpp_framework EXPORT OctCppFrameworkTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+file(GLOB oct_cpp_framework_HEADERS "${CMAKE_CURRENT_SOURCE_DIR}/oct_cpp_framework/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/oct_cpp_framework/**/*.h")
+install(
+  FILES
+    ${oct_cpp_framework_HEADERS}
+    "${CMAKE_CURRENT_BINARY_DIR}/oct_cpp_framework_export.h"
+  DESTINATION
+    include
+  COMPONENT
+    Devel
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/octcppframework/OctCppFrameworkConfigVersion.cmake"
+  VERSION ${CppOctFramework_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+export(EXPORT OctCppFrameworkTargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/octcppframework/OctCppFrameworkTargets.cmake"
+  NAMESPACE OctCppFramework::
+)
+configure_file(cmake/OctCppFrameworkConfig.cmake
+  "${CMAKE_CURRENT_BINARY_DIR}/octcppframework/OctCppFrameworkConfig.cmake"
+  COPY_ONLY
+)
+
+target_include_directories(
+    oct_cpp_framework PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/>"
+    "$<BUILD_INTERFACE:${generated_headers}>"
+)
+
+set(ConfigPackageLocation lib/cmake/octcppframework)
+
+install(EXPORT OctCppFrameworkTargets
+  FILE
+    OctCppFrameworkTargets.cmake
+  NAMESPACE
+    OctCppFramework::
+  DESTINATION
+    ${ConfigPackageLocation}
+)
+install(
+  FILES
+    cmake/OctCppFrameworkConfig.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/octcppframework/OctCppFrameworkConfigVersion.cmake"
+  DESTINATION
+    ${ConfigPackageLocation}
+  COMPONENT
+    Devel
+)
+
+export(PACKAGE OctCppFramework)

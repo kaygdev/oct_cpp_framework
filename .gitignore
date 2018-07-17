@@ -1,0 +1,4 @@
+/build/
+/release/
+*-swp
+/.kdev4
