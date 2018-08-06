@@ -256,7 +256,10 @@ namespace CppFW
 		assert(node.type() == CVMatTree::Type::Undef);
 
 		if(callbackStepper)
-			callbackStepper->setStep(istream->tellg());
+		{
+			if(!callbackStepper->setStep(istream->tellg()))
+				return false;
+		}
 		
 		uint32_t type = readBinStream<uint32_t>(*istream);
 		switch(static_cast<CVMatTree::Type>(type))
