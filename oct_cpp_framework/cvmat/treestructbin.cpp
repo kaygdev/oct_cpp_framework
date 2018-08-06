@@ -10,6 +10,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>
+#include <callback.h>
 
 namespace bfs = boost::filesystem;
 
@@ -142,26 +143,32 @@ namespace CppFW
 	}
 
 
-	CVMatTree CVMatTreeStructBin::readBin(std::istream& stream)
+	CVMatTree CVMatTreeStructBin::readBin(std::istream& stream, CallbackStepper* callbackStepper)
 	{
 		CVMatTreeStructBin reader(stream);
 		CVMatTree tree;
 
 		if(reader.readHeader())
 		{
-			reader.handleNodeRead(tree);
+			reader.handleNodeRead(tree, callbackStepper);
 		}
 
 		return tree;
 	}
 
-	CVMatTree CVMatTreeStructBin::readBin(const std::string& filename)
+	CVMatTree CVMatTreeStructBin::readBin(const std::string& filename, Callback* callback)
 	{
+		boost::system::error_code ec;
+		boost::uintmax_t filesize = bfs::file_size(filename, ec);
+		if(ec)
+			filesize = 1;
+		CppFW::CallbackStepper callbackStepper(callback, filesize);
+
 		std::ifstream stream(filename, std::ios::binary | std::ios::in);
 		if(!stream.good())
 			return CVMatTree();
 
-		return readBin(stream);
+		return readBin(stream, &callbackStepper);
 	}
 
 
@@ -183,7 +190,7 @@ namespace CppFW
 	}
 
 
-	bool CVMatTreeStructBin::readDir(CVMatTree& node)
+	bool CVMatTreeStructBin::readDir(CVMatTree& node, CallbackStepper* callbackStepper)
 	{
 		bool ret = true;
 		uint32_t dirLength = readBinStream<uint32_t>(*istream);
@@ -191,7 +198,7 @@ namespace CppFW
 		{
 			std::string name = readBinSting(*istream);
 
-			ret &= handleNodeRead(node.getDirNode(name));
+			ret &= handleNodeRead(node.getDirNode(name), callbackStepper);
 		}
 		return ret;
 	}
@@ -208,13 +215,13 @@ namespace CppFW
 		}
 	}
 
-	bool CVMatTreeStructBin::readList(CVMatTree& node)
+	bool CVMatTreeStructBin::readList(CVMatTree& node, CallbackStepper* callbackStepper)
 	{
 		bool ret = true;
 		uint32_t listLength = readBinStream<uint32_t>(*istream);
 		for(uint32_t i=0; i<listLength; ++i)
 		{
-			ret &= handleNodeRead(node.newListNode());
+			ret &= handleNodeRead(node.newListNode(), callbackStepper);
 		}
 		return ret;
 	}
@@ -244,9 +251,12 @@ namespace CppFW
 	}
 	
 
-	bool CVMatTreeStructBin::handleNodeRead(CVMatTree& node)
+	bool CVMatTreeStructBin::handleNodeRead(CVMatTree& node, CallbackStepper* callbackStepper)
 	{
 		assert(node.type() == CVMatTree::Type::Undef);
+
+		if(callbackStepper)
+			callbackStepper->setStep(istream->tellg());
 		
 		uint32_t type = readBinStream<uint32_t>(*istream);
 		switch(static_cast<CVMatTree::Type>(type))
@@ -254,9 +264,9 @@ namespace CppFW
 			case CVMatTree::Type::Undef:
 				return true;
 			case CVMatTree::Type::Dir:
-				return readDir(node);
+				return readDir(node, callbackStepper);
 			case CVMatTree::Type::List:
-				return readList(node);
+				return readList(node, callbackStepper);
 			case CVMatTree::Type::Mat:
 				return readMatP(node.getMat());
 			case CVMatTree::Type::String:

@@ -10,6 +10,8 @@ namespace cv { class Mat; }
 namespace CppFW
 {
 	class CVMatTree;
+	class CallbackStepper;
+	class Callback;
 
 	class CVMatTreeStructBin
 	{
@@ -28,11 +30,11 @@ namespace CppFW
 		// reader functions
 		bool readHeader();
 		bool readMatP  (cv::Mat& mat);
-		bool readDir   (CVMatTree& node);
-		bool readList  (CVMatTree& node);
+		bool readDir   (CVMatTree& node, CallbackStepper* callbackStepper);
+		bool readList  (CVMatTree& node, CallbackStepper* callbackStepper);
 		bool readString(std::string& str);
 
-		bool handleNodeRead(CVMatTree& node);
+		bool handleNodeRead(CVMatTree& node, CallbackStepper* callbackStepper);
 
 		
 		CVMatTreeStructBin(std::ostream& stream) : ostream(&stream) {}
@@ -43,8 +45,8 @@ namespace CppFW
 		static bool writeBin(const std::string& filename, const CVMatTree& tree);
 		static bool writeBin(const std::string& filename, const cv::Mat& mat);
 		
-		static CVMatTree readBin(const std::string& filename);
-		static CVMatTree readBin(std::istream& stream);
+		static CVMatTree readBin(const std::string& filename, Callback* callback = nullptr);
+		static CVMatTree readBin(std::istream& stream, CallbackStepper* callbackStepper = nullptr);
 
 		static void writeMatlabReadCode (const char* filename);
 		static void writeMatlabWriteCode(const char* filename);
