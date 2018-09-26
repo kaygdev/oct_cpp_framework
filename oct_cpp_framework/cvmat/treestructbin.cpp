@@ -357,7 +357,7 @@ namespace CppFW
 		{
 			HandleType(uint8_t)
 			HandleType(uint16_t)
-			HandleType(uint32_t)
+//			HandleType(uint32_t)
 // 			HandleType(uint64_t)
 			HandleType(int8_t)
 			HandleType(int16_t)
@@ -390,7 +390,7 @@ namespace CppFW
 		{
 			HandleType(uint8_t)
 			HandleType(uint16_t)
-			HandleType(uint32_t)
+//			HandleType(uint32_t)
 			HandleType(int8_t)
 			HandleType(int16_t)
 			HandleType(int32_t)
@@ -505,12 +505,12 @@ namespace CppFW
 		stream << "	switch depth\n";
 		MatlabSwtichType(uint8_t , uint8 )
 		MatlabSwtichType(uint16_t, uint16)
-		MatlabSwtichType(uint32_t, uint32)
-		MatlabSwtichType(uint64_t, uint64)
+//		MatlabSwtichType(uint32_t, uint32)
+//		MatlabSwtichType(uint64_t, uint64)
 		MatlabSwtichType( int8_t , int8  )
 		MatlabSwtichType( int16_t, int16 )
 		MatlabSwtichType( int32_t, int32 )
-		MatlabSwtichType( int64_t, int64 )
+//		MatlabSwtichType( int64_t, int64 )
 		MatlabSwtichType(float   , single)
 		MatlabSwtichType(double  , double)
 #undef MatlabSwtichType
@@ -619,7 +619,7 @@ namespace CppFW
 #define MatlabSwtichType(STR, X, Y) 	stream << "	" STR"if isa(mat, '"#Y"')\n\t\tdepth = " << boost::lexical_cast<std::string>(cv::DataType<X>::depth) << "';\n";
 		MatlabSwtichType(""    , uint8_t , uint8 )
 		MatlabSwtichType("else", uint16_t, uint16)
-		MatlabSwtichType("else", uint32_t, uint32)
+//		MatlabSwtichType("else", uint32_t, uint32)
 // 		MatlabSwtichType("else", uint64_t, uint64)
 		MatlabSwtichType("else",  int8_t , int8  )
 		MatlabSwtichType("else",  int16_t, int16 )
@@ -649,7 +649,7 @@ namespace CppFW
 #define MatlabSwtichType(STR, X) stream << "	" STR"if isa(mat, '"#X"')\n\t\tfwrite(fileID, mat', '"#X"')';\n";
 		MatlabSwtichType(""    , uint8 )
 		MatlabSwtichType("else", uint16)
-		MatlabSwtichType("else", uint32)
+//		MatlabSwtichType("else", uint32)
 // 		MatlabSwtichType("else", uint64)
 		MatlabSwtichType("else", int8  )
 		MatlabSwtichType("else", int16 )

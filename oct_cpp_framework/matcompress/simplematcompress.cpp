@@ -135,14 +135,14 @@ namespace CppFW
 
 	bool SimpleMatCompress::fromCVMatTree(const CppFW::CVMatTree& imgCompressNode)
 	{
-		int imageHeight = CppFW::CVMatTreeExtra::getCvScalar(&imgCompressNode, "height", uint32_t());
-		int imageWidth  = CppFW::CVMatTreeExtra::getCvScalar(&imgCompressNode, "width" , uint32_t());
+		int imageHeight = CppFW::CVMatTreeExtra::getCvScalar(&imgCompressNode, "height", int32_t());
+		int imageWidth  = CppFW::CVMatTreeExtra::getCvScalar(&imgCompressNode, "width" , int32_t());
 		const cv::Mat& compressSymbols   = imgCompressNode.getDirNode("compressSymbols")  .getMat();
 		const cv::Mat& compressRunLength = imgCompressNode.getDirNode("compressRunLength").getMat();
 
 
 		if(cv::DataType<uint8_t> ::type != compressSymbols  .type()
-		|| cv::DataType<uint32_t>::type != compressRunLength.type())
+		|| cv::DataType< int32_t>::type != compressRunLength.type())
 			return false;
 
 		if(compressSymbols.rows*compressSymbols.cols != compressRunLength.rows*compressRunLength.cols)
@@ -151,14 +151,14 @@ namespace CppFW
 		const int compDataLength = compressSymbols.rows*compressSymbols.cols;
 
 		const uint8_t * compSymbolPtr = compressSymbols  .ptr<uint8_t >();
-		const uint32_t* compRunLenPtr = compressRunLength.ptr<uint32_t>();
+		const  int32_t* compRunLenPtr = compressRunLength.ptr< int32_t>();
 
 		segmentsChange.clear();
 		segmentsChange.reserve(compDataLength);
 		for(int i = 0; i < compDataLength; ++i)
 		{
 			uint8_t  symbol = *compSymbolPtr;
-			uint32_t number = *compRunLenPtr;
+			 int32_t number = *compRunLenPtr;
 
 			segmentsChange.emplace_back(number, symbol);
 
@@ -175,10 +175,10 @@ namespace CppFW
 	void SimpleMatCompress::toCVMatTree(CppFW::CVMatTree& imgCompressNode) const
 	{
 		cv::Mat compressSymbols   = cv::Mat(1, segmentsChange.size(), cv::DataType<uint8_t> ::type);
-		cv::Mat compressRunLength = cv::Mat(1, segmentsChange.size(), cv::DataType<uint32_t>::type);
+		cv::Mat compressRunLength = cv::Mat(1, segmentsChange.size(), cv::DataType< int32_t>::type);
 
 		uint8_t * compSymbolPtr = compressSymbols  .ptr<uint8_t >();
-		uint32_t* compRunLenPtr = compressRunLength.ptr<uint32_t>();
+		 int32_t* compRunLenPtr = compressRunLength.ptr< int32_t>();
 		for(const MatSegment& segment : segmentsChange)
 		{
 			*compSymbolPtr = segment.value;

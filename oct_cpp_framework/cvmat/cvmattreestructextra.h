@@ -79,7 +79,7 @@ namespace CppFW
 				handleType(int32_t);
 				handleType(uint8_t);
 				handleType(uint16_t);
-				handleType(uint32_t);
+//				handleType(uint32_t);
 #undef handleType
 			}
 
@@ -125,7 +125,7 @@ namespace CppFW
 				handleType(int32_t);
 				handleType(uint8_t);
 				handleType(uint16_t);
-				handleType(uint32_t);
+//				handleType(uint32_t);
 				handleType(float);
 				handleType(double);
 #undef handleType
