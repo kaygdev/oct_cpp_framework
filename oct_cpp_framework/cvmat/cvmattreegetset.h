@@ -20,7 +20,7 @@
 #include "cvmattreestruct.h"
 #include"cvmattreestructextra.h"
 
-#include <opencv/cv.h>
+#include<opencv2/opencv.hpp>
 
 namespace CppFW
 {

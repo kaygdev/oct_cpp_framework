@@ -23,7 +23,7 @@
 #include <fstream>
 #include <string>
 
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem.hpp>

@@ -17,10 +17,12 @@
 
 #include "zipcpp.h"
 
-#include<minizip/zip.h>
 
 
 #ifdef WITH_ZLIB
+#include<minizip/zip.h>
+
+
 namespace CppFW
 {
 
