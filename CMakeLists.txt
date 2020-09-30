@@ -36,21 +36,21 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Wunreachable-code -Werror ${CMAKE_CXX_FLAGS_DEBUG}")        ## -Weverything
-	set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC ${CMAKE_CXX_FLAGS}")
+	set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 	if(${WIN32})
-		set(CMAKE_CXX_FLAGS "-mno-ms-bitfields -static -static-libstdc++ ${CMAKE_CXX_FLAGS}")
+		string(APPEND CMAKE_CXX_FLAGS " -mno-ms-bitfields")
+	else()
+		string(APPEND CMAKE_CXX_FLAGS " -fPIC")
 	endif()
 endif()
 
-
-file(GLOB sources_b "${CMAKE_CURRENT_SOURCE_DIR}/oct_cpp_framework/*.cpp")
 file(GLOB sources "${CMAKE_CURRENT_SOURCE_DIR}/oct_cpp_framework/**/*.cpp")
 
-list(APPEND sources ${sources_b})
+add_library(oct_cpp_framework STATIC ${sources})
 
 
-add_library(oct_cpp_framework ${sources})
+target_link_libraries(oct_cpp_framework PRIVATE ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
 
 
 if(BUILD_UNIT_TESTS)
@@ -129,7 +129,6 @@ export(EXPORT OctCppFrameworkTargets
 )
 configure_file(cmake/OctCppFrameworkConfig.cmake
   "${CMAKE_CURRENT_BINARY_DIR}/octcppframework/OctCppFrameworkConfig.cmake"
-  COPY_ONLY
 )
 
 target_include_directories(
