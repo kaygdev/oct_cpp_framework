@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.6)
 project(oct_cpp_framework)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake_module/)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 set(CppOctFramework_VERSION 1.0.0)
@@ -15,9 +16,7 @@ option(BUILD_MEX_WITH_STATIC_CPP_LIB "build mex with static c++ lib" OFF)
 option(BUILD_WITH_ZLIB               "build the programms with ZLIB" ON)
 
 if(BUILD_UNIT_TESTS)
-	find_package(Boost COMPONENTS unit_test_framework filesystem system REQUIRED)
-else()
-	find_package(Boost COMPONENTS filesystem system REQUIRED)
+	find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 endif()
 
 find_package(OpenCV REQUIRED)
@@ -36,8 +35,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -Wunreachable-code -Werror ${CMAKE_CXX_FLAGS_DEBUG}")        ## -Weverything
-	set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-
+	
 	if(${WIN32})
 		string(APPEND CMAKE_CXX_FLAGS " -mno-ms-bitfields")
 	else()

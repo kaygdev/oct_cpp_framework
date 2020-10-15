@@ -18,9 +18,9 @@
 #pragma once
 
 #include <string>
+#include<filesystem>
 
 #include <boost/predef.h>
-#include <boost/filesystem.hpp>
 
 
 
@@ -35,7 +35,7 @@
 		return converter.from_bytes(utf_str);
 	}
 
-	inline std::wstring filepathConv(const boost::filesystem::path& file)
+	inline std::wstring filepathConv(const std::filesystem::path& file)
 	{
 		return file.generic_wstring();
 	}
@@ -44,7 +44,7 @@
 	typedef std::string FileString;
 
 	inline const std::string& filenameConv(const std::string& utf_str) { return utf_str; }
-	inline const std::string& filepathConv(const boost::filesystem::path& file)
+	inline const std::string filepathConv(const std::filesystem::path& file)
 	{
 		return file.generic_string();
 	}

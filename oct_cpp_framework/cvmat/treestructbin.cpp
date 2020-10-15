@@ -22,14 +22,14 @@
 
 #include <fstream>
 #include <string>
+#include <filesystem>
 
 #include <opencv2/opencv.hpp>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/filesystem.hpp>
 #include <callback.h>
 
-namespace bfs = boost::filesystem;
+namespace sfs = std::filesystem;
 
 namespace CppFW
 {
@@ -175,10 +175,7 @@ namespace CppFW
 
 	CVMatTree CVMatTreeStructBin::readBin(const std::string& filename, Callback* callback)
 	{
-		boost::system::error_code ec;
-		boost::uintmax_t filesize = bfs::file_size(filename, ec);
-		if(ec)
-			filesize = 1;
+		std::size_t filesize = sfs::file_size(filename);
 		CppFW::CallbackStepper callbackStepper(callback, filesize);
 
 		std::ifstream stream(filename, std::ios::binary | std::ios::in);
@@ -408,7 +405,7 @@ namespace CppFW
 
 	void CVMatTreeStructBin::writeMatlabReadCode(const char* filename)
 	{
-		bfs::path file(filename);
+		sfs::path file(filename);
 
 		const std::string basename = file.stem().generic_string();
 
@@ -528,7 +525,7 @@ namespace CppFW
 
 	void CVMatTreeStructBin::writeMatlabWriteCode(const char* filename)
 	{
-		bfs::path file(filename);
+		sfs::path file(filename);
 
 		const std::string basename = file.stem().generic_string();
 
